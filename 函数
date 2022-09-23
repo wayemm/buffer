@@ -1,0 +1,284 @@
+# 函数
+
+## 形参
+
+### 引用形参与非引用形参
+
+#### 何为引用
+
+int a=5;    
+
+int &ver=a;
+
+此时ver就是a,两者地址相同。
+
+对ver的操作即为对a的操作
+
+```c++
+#include<iostream>
+int main()
+{
+    using namespace std;
+    cout << "please input a's value:";
+    int a;
+    cin >> a;
+    int& ver = a;
+    cout << "a的地址:"
+        <<& a << '\n'
+        << "ver的地址:" 
+        << &ver << endl;
+    ver += 3;
+    cout <<"执行ver+3=后,a的地值为："
+        << a << endl;
+    return 0;
+}
+
+/*执行结果
+please input a's value:5
+a的地址:000000F087EFF814
+ver的地址:000000F087EFF814
+执行ver+3=后,a的地值为：8
+*/
+```
+
+#### 引用形参与非引用形参对比
+
+非引用形参：
+
+ 	即将主函数中的实参进行复制赋值给形参，此时形参为实参的副本，在函数中形参尽其责后，内存释放，形参消失，故无法对实参进行操作。
+
+引用形参：
+
+ 	即在函数中可以对实参进行修改。
+
+  	**当向函数传递大型对象时，需要使用引用形参。此时复制实参效率过低，此时使用引用实参，函数直接访问实参对象，无需复制它。**
+
+```c++
+#include<iostream>
+void gcb(int& a, int b)
+{
+    if (a > b)
+        a += 5;
+}
+
+void gcl(int a, int b)
+{
+    a += 6;
+}
+int main()
+{
+    using namespace std;
+    int value = 5;
+    int bbb = 3;
+    gcl(value, bbb);
+    cout << "after gcl() "
+        << "value= " << value
+        << endl;
+    gcb(value, bbb);
+    cout << "after geb() "
+        << "value= "
+        << value << endl;
+    return 0;
+}
+```
+
+
+
+#### const引用和非const引用
+
+ 	如果使用引用形参的唯一目的是避免复制实参，则应该将形参定义为const引用。(作用就是函数本身无法修改实参，起到对实参的保护作用)
+
+```c++
+bool isShorter(const string &s1,const string &s2)
+{
+    return s1.size()<s2.size();
+}
+//既提升效率，又保护实参。
+```
+
+ 	函数具有非const引用形参，不能对主函数中const对象进行调用（因为const对象不允许进行修改）
+
+ 	另外：非const引用形参只能与完全同类型的非const对象关联。            下述代码11行
+
+```c++
+#include<iostream>
+int Da( int& a)
+{
+    return ++a;
+}
+int main()
+{
+    using namespace std;
+    short v2=0;
+    const int j = 5;
+    int v3=Da(v2);
+    int i = 5;
+    i = Da(i);
+    cout << i << endl;
+    j = Da(i);
+    cout << j << endl;
+    j = Da(j);
+    cout << j;
+    return 0;
+}
+
+/*
+严重性	代码	说明	项目	文件	行	禁止显示状态
+错误(活动)	E0434	无法用 "short" 类型的值初始化 "int &" 类型的引用(非常量限定)	测试	D:\桌面\测试\测试\测试.cpp	11	
+错误(活动)	E0137	表达式必须是可修改的左值	测试	D:\桌面\测试\测试\测试.cpp	15	
+错误(活动)	E0137	表达式必须是可修改的左值	测试	D:\桌面\测试\测试\测试.cpp	17	
+错误(活动)	E0433	将 "int &" 类型的引用绑定到 "const int" 类型的初始值设定项时，限定符被丢弃	测试	D:\桌面\测试\测试\测试.cpp	17	
+
+*/
+```
+
+#### vector与迭代器
+
+ 	向vector中添加元素,**使用vector操作size()时要使用相应的size_type类型。不要把size的返回值赋值给一个int变量。**
+
+```c++
+#include<iostream>
+#include<string>
+#include <vector>
+int main()
+{
+	using namespace std;
+	string word;
+	vector<string> text;
+	cout << "please input name:";
+	while (cin >> word)  //使用cin输入判断输入结束时按下 回车+ctrl&&Z+回车
+	{
+		text.push_back(word);
+	}
+	for (vector<int>::size_type i = 0; i !=text.size(); i++)
+	{
+		cout << text[i]<<'\t';
+	}
+	return 0;
+}
+
+
+/*
+输出结果
+please input name:你好 那时的 阿达
+^Z
+你好    那时的  阿达
+*/
+
+```
+
+
+
+#####  迭代器
+
+ 	迭代器是一种检查容器内元素并遍历元素的数据类型。标准库为每一种标注容器定义了一种迭代器类型。**所有的标准库容器都定义了相应的迭代器类型。**
+
+```c++
+vector<int>::iterator iter;
+//此语句定义了一个名为iter的变量
+```
+
+应用实例
+
+ 	下述for循环中首先定义了iter并将它初始化为指向text的第一个元素。循环条件是测试iter是否与end操作返回的迭代器不等。
+
+ 	由end操作返回的迭代器指向vector的“末端元素的下一个”。假设vector有3个元素，那么 end操作指向第四个不存在的元素。
+
+ 	*iter:   *是解引用运算符，用来访问迭代器所指向的元素。（类似于指针）。
+
+```c++
+#include<iostream>
+#include<string>
+#include <vector>
+int main()
+{
+	using namespace std;
+	string word;
+	vector<string> text;
+	cout << "please input name:";
+	while (cin >> word)  //使用cin输入判断输入结束时按下 回车+ctrl&&Z+回车
+	{
+		text.push_back(word);
+	}
+	for (vector<int>::iterator iter=text.begin();
+        iter!=text.end();++iter)
+	{
+		cout << *iter<<'\t';
+	}
+	return 0;
+}
+
+```
+
+##### 迭代器的算术运算
+
+```
+iter+n
+
+iter-n
+```
+
+iter1-iter2
+
+ 	此表达式用来计算两个迭代器对象的距离，该距离是名为difference_type的signed类型的值，此处的difference_type类似于size_type类型，也是由vector定义的。difference_type是signed类型，因为减法运算可能产生负数的结果。
+
+ 	**注意：iter1与iter2必须指向同一vector中的元素。任何改变vector的操作都会使已存在的迭代器失效。**
+
+##### const迭代器
+
+ 
+
+```c++
+vector<string>::const_iterator iter=text.begin();
+```
+
+作用：只能用于读取容器中的元素，不能改变其值。
+
+#### 利用引用形参返回额外的信息
+
+```c++
+#include<iostream>
+#include<string>
+#include<vector>
+using namespace std;
+vector<int>::const_iterator find_v(vector<int>::iterator beg,
+	vector<int>::iterator end, int c, vector<int>::size_type& occers)
+{
+	vector<int>::iterator ree = end; //ree相当于指针的话，他指向了哪里呢？end指向的是尚不存在的元素。
+	occers = 0;
+	for(;beg!=end; ++beg)    //beg!=end 相当于一个恒为真条件，但当遍历完str中元素后，++beg指向的也是尚不存在的元素，此时跳出循环。
+	{
+		if (*beg == c) {    //beg指向的元素如果！=c,跳出此循环
+			if (ree==end)   //相当于地址是否相同？意义在于何处？
+			{
+				ree = beg;   //若相同ree指向与beg相同的位置。
+			}
+			++occers;   //&occers是引用实参，主函数中的ctr会被改变。
+		}
+	}
+	return ree;
+}
+	
+
+int main()
+{
+	vector<int>::size_type ctr;
+	vector<int>::const_iterator it;
+	vector<int> str;
+	int sc;
+	while (cin>>sc)
+	{
+		str.push_back(sc);   //在str的末尾添加名为sc的元素。
+	}
+	it=find_v(str.begin(), str.end(), 60, ctr);   //如果输入两个不等于c的数值，那么此时相当于it=str.end(),*it指向的东西超范围，报错;反之*it等于60。
+    cout<<*it;
+	cout << ctr;
+	return 0;
+}
+
+```
+
+
+
+![1663935854930](E:\Dev\C++ Primer Plus\函数\1663935854930.png)
+
